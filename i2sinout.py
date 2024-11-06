@@ -169,6 +169,10 @@ right_bit:
         return self._samples_signed
     
     @property
+    def buffer_size(self) -> int:
+        return self._buffer_size
+    
+    @property
     def buffer_format(self) -> str:
         return self._buffer_format
     
