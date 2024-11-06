@@ -6,7 +6,6 @@ import array
 
 import audiobusio
 import audiocore
-import audiodelays
 import audiomixer
 import board
 
@@ -21,14 +20,11 @@ properties = {
     "samples_signed": True,
 }
 
-bit_clock_pin = board.GP0
-word_select_pin = board.GP1
-
 input = i2sinout.I2SInOut(
     peripheral=True,  # Share clock signals with I2SOut
-    bit_clock=bit_clock_pin,
-    word_select=word_select_pin,
-    data_in=board.GP2,
+    data_in=board.GP0,
+    bit_clock=board.GP1,
+    word_select=board.GP2,
     buffer_size=BUFFER_SIZE,
     **properties,
 )
@@ -41,30 +37,35 @@ sample = audiocore.RawSample(
     single_buffer=False,  # double-buffer is required to update buffer properly
 )
 
-effect = audiodelays.Echo(
-    buffer_size=BUFFER_SIZE,
-    **properties,
-)
-effect.play(sample, loop=True)
-
 mixer = audiomixer.Mixer(
     voice_count=1,
     buffer_size=BUFFER_SIZE,
     **properties,
 )
-mixer.play(effect)
 
 # Currently unable to get buffer from audio sample objects to feed into I2SInOut
-# Must use a separate `audiosample.I2SOut` object
+# Must use a separate `audiosample.I2SOut` object, and connect bit_clock and word_select together
 output = audiobusio.I2SOut(
-    bit_clock=bit_clock_pin,  # Share clock signal pins with I2SInOut
-    word_select=word_select_pin,
+    bit_clock=board.GP3,
+    word_select=board.GP4,
     data=board.GP5,
 )
 output.play(mixer)
 
+try:
+    import audiodelays
+
+    effect = audiodelays.Echo(
+        buffer_size=BUFFER_SIZE,
+        **properties,
+    )
+    effect.play(sample, loop=True)
+    mixer.voice[0].play(effect)
+except ImportError:
+    mixer.voice[0].play(sample, loop=True)
+
 while True:
     # Load RawSample buffer with I2S input data
     data = input.read()
-    for i in len(BUFFER_SIZE):
+    for i in range(BUFFER_SIZE):
         sample_buffer[i] = data[i]
