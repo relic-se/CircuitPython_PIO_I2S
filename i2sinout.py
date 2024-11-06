@@ -128,7 +128,10 @@ right_bit:
             pioasm = f"""
 .program i2s_codec
 .side_set 2
+    wait 1 gpio {word_select_gpio}
+    wait 1 gpio {bit_clock_gpio}
     wait 0 gpio {word_select_gpio}
+    wait 0 gpio {bit_clock_gpio}
     set x {bits_per_sample-2}
     wait 1 gpio {bit_clock_gpio}
 left_bit:
@@ -158,8 +161,8 @@ right_bit:
 
         self._pio = rp2pio.StateMachine(
             program=adafruit_pioasm.assemble(pioasm),
-            wrap_target=1,
-            frequency=sample_rate * bits_per_sample * 2 * 4 * (int(peripheral) + 1),
+            wrap_target=1 if not peripheral else 4,
+            frequency=sample_rate * bits_per_sample * 2 * (4 if not peripheral else 16),
             first_out_pin=data_out,
             out_pin_count=1,
             first_in_pin=data_in,
