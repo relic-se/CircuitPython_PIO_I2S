@@ -1,15 +1,16 @@
-# SPDX-FileCopyrightText: 2017 Scott Shawcroft, written for Adafruit Industries
 # SPDX-FileCopyrightText: Copyright (c) 2024 Cooper Dalrymple
 #
 # SPDX-License-Identifier: Unlicense
 
 import array
-import board
-import i2sinout
 import math
 
+import board
+
+import i2sinout
+
 codec = i2sinout.I2SInOut(
-    bit_clock=board.GP0, # word select is GP1
+    bit_clock=board.GP0,  # word select is GP1
     data_out=board.GP3,
     channel_count=2,
     sample_rate=22050,
@@ -22,7 +23,10 @@ codec = i2sinout.I2SInOut(
 length = codec.sample_rate // 440
 sine_wave = array.array(codec.buffer_format, [0] * codec.buffer_size)
 for i in range(codec.buffer_size // codec.channel_count):
-    value = int(math.sin(math.pi * 2 * i / length) * ((2 ** (codec.bits_per_sample - 1)) - 1) + (2 ** (codec.bits_per_sample - 1) if not codec.samples_signed else 0))
+    value = int(
+        math.sin(math.pi * 2 * i / length) * ((2 ** (codec.bits_per_sample - 1)) - 1)
+        + (2 ** (codec.bits_per_sample - 1) if not codec.samples_signed else 0)
+    )
     for j in range(codec.channel_count):
         sine_wave[i * codec.channel_count + j] = value
 

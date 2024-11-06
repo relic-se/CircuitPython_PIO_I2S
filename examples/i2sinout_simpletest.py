@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Unlicense
 
 import board
+
 import i2sinout
 
 codec = i2sinout.I2SInOut(

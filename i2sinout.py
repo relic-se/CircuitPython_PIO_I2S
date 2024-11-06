@@ -52,6 +52,7 @@ class I2SInOut:
     def __init__(  # noqa: PLR0913
         self,
         bit_clock: microcontroller.Pin,
+        word_select: microcontroller.Pin = None,
         data_out: microcontroller.Pin = None,
         data_in: microcontroller.Pin = None,
         channel_count: int = 2,
@@ -59,17 +60,26 @@ class I2SInOut:
         bits_per_sample: int = 16,
         samples_signed: bool = True,
         buffer_size: int = 1024,
+        peripheral: bool = False,
     ):
-        
+        if (
+            not peripheral
+            and word_select
+            and not rp2pio.pins_are_sequential([bit_clock, word_select])
+        ):
+            raise ValueError(
+                "Word select pin must be sequential to bit clock pin if device is controller"
+            )
+
         if channel_count < 1 or channel_count > 2:
             raise ValueError("Invalid channel count")
-        
+
         if bits_per_sample % 8 != 0 or bits_per_sample < 8 or bits_per_sample > 32:
             raise ValueError("Invalid bits per sample")
-        
+
         if buffer_size < 1:
             raise ValueError("Buffer size must be greater than 0")
-        
+
         self._channel_count = channel_count
         self._sample_rate = sample_rate
         self._bits_per_sample = bits_per_sample
@@ -81,11 +91,12 @@ class I2SInOut:
 
         left_channel_out = "out pins 1" if self._writable else "nop"
         right_channel_out = "out pins 1" if self._writable and channel_count > 1 else "nop"
-        
+
         left_channel_in = "in pins 1" if self._readable else "nop"
         right_channel_in = "in pins 1" if self._readable and channel_count > 1 else "nop"
 
-        pioasm = f"""
+        if not peripheral:
+            pioasm = f"""
 .program i2s_codec
 .side_set 2
     nop                         side 0b01
@@ -104,47 +115,86 @@ right_bit:
     {right_channel_out}         side 0b00 [1]
     {right_channel_in}          side 0b01
 """
+        else:
+            # TODO: Convert microcontroller.Pin to index
+            bit_clock_gpio = int(bit_clock)
+            word_select_gpio = int(word_select) if word_select else bit_clock_gpio + 1
+            pioasm = f"""
+.program i2s_codec
+.side_set 2
+    wait 0 gpio {word_select_gpio}
+    set x {bits_per_sample-2}
+    wait 1 gpio {bit_clock_gpio}
+left_bit:
+    wait 0 gpio {bit_clock_gpio}
+    {left_channel_out}
+    wait 1 gpio {bit_clock_gpio}
+    {left_channel_in}
+    jmp x-- left_bit
+    wait 1 gpio {word_select_gpio}
+    wait 0 gpio {bit_clock_gpio}
+    {left_channel_out}
+    wait 1 gpio {bit_clock_gpio}
+    {left_channel_in}
+    set x {bits_per_sample-2}
+right_bit:
+    wait 0 gpio {bit_clock_gpio}
+    {right_channel_out}
+    wait 1 gpio {bit_clock_gpio}
+    {right_channel_in}
+    jmp x-- right_bit
+    wait 0 gpio {word_select_gpio}
+    wait 0 gpio {bit_clock_gpio}
+    {right_channel_out}
+    wait 1 gpio {bit_clock_gpio}
+    {right_channel_in}
+"""
 
         self._pio = rp2pio.StateMachine(
             program=adafruit_pioasm.assemble(pioasm),
             wrap_target=1,
-            frequency=sample_rate * bits_per_sample * 2 * 4,
-
+            frequency=sample_rate * bits_per_sample * 2 * 4 * (int(peripheral) + 1),
             first_out_pin=data_out,
-            out_pin_count=1,
-
-            first_in_pin=data_in,
-            in_pin_count=1,
-
-            first_sideset_pin=bit_clock,
-            sideset_pin_count=2,
-
-            auto_pull=True,
+            out_pin_count=1 if data_out else 0,
+            first_in_pin=data_in if not peripheral else bit_clock,
+            in_pin_count=(1 if data_in else 0) if not peripheral else (3 if data_in else 2),
+            first_sideset_pin=bit_clock if not peripheral else None,
+            sideset_pin_count=2 if not peripheral else 0,
+            auto_pull=bool(data_in),
             pull_threshold=bits_per_sample,
             out_shift_right=False,
-
-            auto_push=True,
+            auto_push=bool(data_out),
             push_threshold=bits_per_sample,
             in_shift_right=False,
         )
 
         # Begin double-buffered background read/write operations
 
-        self._buffer_format = "b" if bits_per_sample is 8 else ("h" if bits_per_sample is 16 else "l")
+        self._buffer_format = (
+            "b" if bits_per_sample is 8 else ("h" if bits_per_sample is 16 else "l")
+        )
         if not samples_signed:
             self._buffer_format = self._buffer_format.upper()
-        
+
         if self._writable:
-            self._buffer_out = [array.array(self._buffer_format, [0 if samples_signed else 2 ** (bits_per_sample - 1)] * buffer_size) for i in range(2)]  # double-buffered
+            self._buffer_out = [
+                array.array(
+                    self._buffer_format,
+                    [0 if samples_signed else 2 ** (bits_per_sample - 1)] * buffer_size,
+                )
+                for i in range(2)
+            ]  # double-buffered
             self._pio.background_write(
                 loop=self._buffer_out[0],
                 loop2=self._buffer_out[1],
             )
             self._write_index = 0
             self._last_write_index = -1
-        
+
         if self._readable:
-            self._buffer_in = [array.array(self._buffer_format, [0] * buffer_size) for i in range(2)]  # double-buffered
+            self._buffer_in = [
+                array.array(self._buffer_format, [0] * buffer_size) for i in range(2)
+            ]  # double-buffered
             self._pio.background_read(
                 loop=self._buffer_in[0],
                 loop2=self._buffer_in[1],
@@ -166,19 +216,19 @@ right_bit:
     @property
     def bits_per_sample(self) -> int:
         return self._bits_per_sample
-    
+
     @property
     def samples_signed(self) -> bool:
         return self._samples_signed
-    
+
     @property
     def buffer_size(self) -> int:
         return self._buffer_size
-    
+
     @property
     def buffer_format(self) -> str:
         return self._buffer_format
-    
+
     @property
     def writable(self) -> bool:
         return self._writable
@@ -193,7 +243,7 @@ right_bit:
                 self._write_index = i
                 break
         return self._write_index
-    
+
     @property
     def write_ready(self) -> bool:
         return self.write_index != self._last_write_index
@@ -203,7 +253,7 @@ right_bit:
         if not self._writable:
             return None
         return self._buffer_out[self.write_index]
-    
+
     @write_buffer.setter
     def write_buffer(self, value: circuitpython_typing.ReadableBuffer) -> None:
         if self._writable:
@@ -212,7 +262,9 @@ right_bit:
                 self._buffer_out[idx][i] = value[i]
             self._last_write_index = idx
 
-    def write(self, data: circuitpython_typing.ReadableBuffer, loop: bool = False, block: bool = True) -> bool:
+    def write(
+        self, data: circuitpython_typing.ReadableBuffer, loop: bool = False, block: bool = True
+    ) -> bool:
         if not self._writable or not data:
             return False
         if block:
@@ -226,9 +278,9 @@ right_bit:
         else:
             if not self.write_ready:
                 return False
-            self.write_buffer = data    
+            self.write_buffer = data
         return True
-    
+
     @property
     def readable(self) -> bool:
         return self._readable

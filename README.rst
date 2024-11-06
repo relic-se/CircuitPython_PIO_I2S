@@ -24,6 +24,11 @@ Introduction
 
 Bidirectional I2S audio communication using PIO.
 
+.. note:: This library relies on ``rp2pio.StateMachine.background_read`` which was introduced in an
+    experimental build of CircuitPython that is not available in the current stable release. See
+    the relevant pull request for further details:
+    `PR #9659 <https://github.com/adafruit/circuitpython/pull/9659>`_.
+
 
 Dependencies
 =============
@@ -97,7 +102,7 @@ Usage Example
 
     import board
     import i2sinout
-    codec = i2sinout.I2SInOut(board.GP0, board.GP2, board.GP3)
+    codec = i2sinout.I2SInOut(board.GP0, data_in=board.GP2, data_out=board.GP3)
     while True:
         codec.write(codec.read())
 
