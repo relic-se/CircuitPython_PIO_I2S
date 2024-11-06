@@ -8,6 +8,7 @@ import audiobusio
 import audiocore
 import audiomixer
 import board
+import ulab.numpy as np
 
 import i2sinout
 
@@ -67,5 +68,6 @@ except ImportError:
 while True:
     # Load RawSample buffer with I2S input data
     data = input.read()
+    print(np.max(np.array(data, dtype=np.int16)))
     for i in range(BUFFER_SIZE):
         sample_buffer[i] = data[i]
