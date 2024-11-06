@@ -69,14 +69,14 @@ class I2SInOut:
         buffer_size: int = 1024,
         peripheral: bool = False,
     ):
-        if (
-            not peripheral
-            and word_select
-            and not rp2pio.pins_are_sequential([bit_clock, word_select])
-        ):
-            raise ValueError(
-                "Word select pin must be sequential to bit clock pin if device is controller"
-            )
+        if word_select and not rp2pio.pins_are_sequential([bit_clock, word_select]):
+            raise ValueError("Word select pin must be sequential to bit clock pin")
+
+        if peripheral and not data_in:
+            raise ValueError("Data input pin must be specified in peripheral mode")
+
+        if peripheral and not rp2pio.pins_are_sequential([data_in, bit_clock]):
+            raise ValueError("Data input pin must come before bit clock pin sequentially")
 
         if channel_count < 1 or channel_count > 2:
             raise ValueError("Invalid channel count")
@@ -163,7 +163,7 @@ right_bit:
             first_out_pin=data_out,
             out_pin_count=1,
             first_in_pin=data_in,
-            in_pin_count=1,
+            in_pin_count=1 if not peripheral else 3,
             first_sideset_pin=bit_clock if not peripheral else None,
             sideset_pin_count=2 if not peripheral else 1,
             auto_pull=True,
