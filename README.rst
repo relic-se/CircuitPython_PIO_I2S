@@ -98,8 +98,8 @@ Usage Example
     import board
     import i2sinout
     codec = i2sinout.I2SInOut(board.GP0, board.GP2, board.GP3)
-    print(data := codec.read(True))
-    codec.write(data)
+    while True:
+        codec.write(codec.read())
 
 Documentation
 =============

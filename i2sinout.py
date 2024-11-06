@@ -135,10 +135,13 @@ right_bit:
             self._buffer_format = self._buffer_format.upper()
         
         if self._writable:
-            self._buffer_silence = array.array(self._buffer_format, [0 if samples_signed else 2 ** (bits_per_sample - 1)] * buffer_size)
+            self._buffer_out = [array.array(self._buffer_format, [0 if samples_signed else 2 ** (bits_per_sample - 1)] * buffer_size) for i in range(2)]  # double-buffered
             self._pio.background_write(
-                loop=self._buffer_silence,
+                loop=self._buffer_out[0],
+                loop2=self._buffer_out[1],
             )
+            self._write_index = 0
+            self._last_write_index = -1
         
         if self._readable:
             self._buffer_in = [array.array(self._buffer_format, [0] * buffer_size) for i in range(2)]  # double-buffered
@@ -180,23 +183,57 @@ right_bit:
     def writable(self) -> bool:
         return self._writable
 
-    def write(self, data: circuitpython_typing.ReadableBuffer, loop: bool = False) -> None:
+    @property
+    def write_index(self) -> int:
+        if not self._writable:
+            return None
+        last_write = self._pio.last_write
+        for i in range(2):
+            if last_write is self._buffer_out[i]:
+                self._write_index = i
+                break
+        return self._write_index
+    
+    @property
+    def write_ready(self) -> bool:
+        return self.write_index != self._last_write_index
+
+    @property
+    def write_buffer(self) -> array.array:
+        if not self._writable:
+            return None
+        return self._buffer_out[self.write_index]
+    
+    @write_buffer.setter
+    def write_buffer(self, value: circuitpython_typing.ReadableBuffer) -> None:
         if self._writable:
-            if loop:
-                self._pio.background_write(
-                    loop=data,
-                )
-            else:
-                self._pio.background_write(
-                    once=data,
-                    loop=self._buffer_silence,
-                )
+            idx = self.write_index
+            for i in range(min(len(value), self._buffer_size)):
+                self._buffer_out[idx][i] = value[i]
+            self._last_write_index = idx
+
+    def write(self, data: circuitpython_typing.ReadableBuffer, loop: bool = False, block: bool = True) -> bool:
+        if not self._writable or not data:
+            return False
+        if block:
+            for i in range(2 if loop else 1):
+                while not self.write_ready:
+                    pass
+                self.write_buffer = data
+        elif loop:
+            for i in range(self._buffer_size):
+                self._buffer_out[0][i] = self._buffer_out[1][i] = data[i % len(data)]
+        else:
+            if not self.write_ready:
+                return False
+            self.write_buffer = data    
+        return True
     
     @property
     def readable(self) -> bool:
         return self._readable
 
-    def read(self, block: bool = False) -> circuitpython_typing.ReadableBuffer:
+    def read(self, block: bool = True) -> circuitpython_typing.ReadableBuffer:
         if not self._readable:
             return None
         if block:

@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Unlicense
 
 import board
-
 import i2sinout
 
 codec = i2sinout.I2SInOut(
@@ -15,5 +14,4 @@ codec = i2sinout.I2SInOut(
 )
 
 while True:
-    if data := codec.read():
-        codec.write(data)
+    codec.write(codec.read())
