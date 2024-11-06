@@ -93,8 +93,13 @@ Or the following command to update an existing version:
 Usage Example
 =============
 
-.. todo:: Add a quick, simple example. It and other examples should live in the
-examples folder and be included in docs/examples.rst.
+.. code-block:: python
+
+    import board
+    import i2sinout
+    codec = i2sinout.I2SInOut(board.GP0, board.GP2, board.GP3)
+    print(data := codec.read(True))
+    codec.write(data)
 
 Documentation
 =============

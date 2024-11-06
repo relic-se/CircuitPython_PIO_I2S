@@ -4,16 +4,19 @@
 # SPDX-License-Identifier: Unlicense
 
 import board
-
 import i2sinout
+import ulab.numpy as np
 
 codec = i2sinout.I2SInOut(
-    bit_clock=board.GP0,  # word select is GP1
-    data_out=board.GP2,
-    data_in=board.GP3,
+    bit_clock=board.GP0, # word select is GP1
+    data_in=board.GP2,
+    channel_count=1,
     sample_rate=22050,
+    bits_per_sample=16,
+    samples_signed=True,
+    buffer_size=1024,
 )
 
 while True:
     if data := codec.read():
-        codec.write(data)
+        print(np.max(np.array(data, dtype=np.int16)))
