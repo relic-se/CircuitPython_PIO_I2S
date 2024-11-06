@@ -39,13 +39,20 @@ __repo__ = "https://github.com/dcooperdalrymple/CircuitPython_I2SInOut.git"
 import array
 
 import adafruit_pioasm
+import microcontroller
 import rp2pio
 
 try:
     import circuitpython_typing
-    import microcontroller
 except ImportError:
     pass
+
+
+def _get_gpio_index(pin: microcontroller.Pin) -> int:
+    for name in dir(microcontroller.pin):
+        if getattr(microcontroller.pin, name) is pin:
+            return int(name.replace("GPIO", ""))
+    return None
 
 
 class I2SInOut:
@@ -116,9 +123,8 @@ right_bit:
     {right_channel_in}          side 0b01
 """
         else:
-            # TODO: Convert microcontroller.Pin to index
-            bit_clock_gpio = int(bit_clock)
-            word_select_gpio = int(word_select) if word_select else bit_clock_gpio + 1
+            bit_clock_gpio = _get_gpio_index(bit_clock)
+            word_select_gpio = _get_gpio_index(word_select) if word_select else bit_clock_gpio + 1
             pioasm = f"""
 .program i2s_codec
 .side_set 2

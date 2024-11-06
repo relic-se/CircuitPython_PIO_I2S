@@ -2,13 +2,14 @@
 #
 # SPDX-License-Identifier: Unlicense
 
-import board
-
 import array
+
 import audiobusio
 import audiocore
 import audiodelays
 import audiomixer
+import board
+
 import i2sinout
 
 BUFFER_SIZE = 1024
