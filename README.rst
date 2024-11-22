@@ -13,8 +13,8 @@ Introduction
     :alt: Discord
 
 
-.. image:: https://github.com/dcooperdalrymple/CircuitPython_I2SInOut/workflows/Build%20CI/badge.svg
-    :target: https://github.com/dcooperdalrymple/CircuitPython_I2SInOut/actions
+.. image:: https://github.com/relic-se/CircuitPython_I2SInOut/workflows/Build%20CI/badge.svg
+    :target: https://github.com/relic-se/CircuitPython_I2SInOut/actions
     :alt: Build Status
 
 
@@ -46,8 +46,6 @@ Installing from PyPI
 =====================
 .. note:: This library is not available on PyPI yet. Install documentation is included
    as a standard element. Stay tuned for PyPI availability!
-
-.. todo:: Remove the above note if PyPI version is/will be available at time of release.
 
 On supported GNU/Linux systems like the Raspberry Pi, you can install the driver locally `from
 PyPI <https://pypi.org/project/circuitpython-i2sinout/>`_.
@@ -104,7 +102,7 @@ Usage Example
     import i2sinout
     codec = i2sinout.I2SInOut(board.GP0, data_in=board.GP2, data_out=board.GP3)
     while True:
-        codec.write(codec.read())
+        codec.write(codec.read(block=True))
 
 Documentation
 =============
@@ -117,5 +115,5 @@ Contributing
 ============
 
 Contributions are welcome! Please read our `Code of Conduct
-<https://github.com/dcooperdalrymple/CircuitPython_I2SInOut/blob/HEAD/CODE_OF_CONDUCT.md>`_
+<https://github.com/relic-se/CircuitPython_I2SInOut/blob/HEAD/CODE_OF_CONDUCT.md>`_
 before contributing to help this project stay welcoming.

@@ -18,7 +18,7 @@ readme = "README.rst"
 authors = [
     {name = "Cooper Dalrymple", email = "me@dcdalrymple.com"}
 ]
-urls = {Homepage = "https://github.com/dcooperdalrymple/CircuitPython_I2SInOut"}
+urls = {Homepage = "https://github.com/relic-se/CircuitPython_I2SInOut"}
 keywords = [
     "adafruit",
     "blinka",
@@ -41,8 +41,6 @@ classifiers = [
 dynamic = ["dependencies", "optional-dependencies"]
 
 [tool.setuptools]
-# TODO: IF LIBRARY FILES ARE A PACKAGE FOLDER,
-#       CHANGE `py_modules = ['...']` TO `packages = ['...']`
 py-modules = ["i2sinout"]
 
 [tool.setuptools.dynamic]

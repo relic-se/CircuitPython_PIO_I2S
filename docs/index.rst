@@ -24,19 +24,16 @@ Table of Contents
 .. toctree::
     :caption: Tutorials
 
-.. todo:: Add any Learn guide links here. If there are none, then simply delete this todo and leave
-    the toctree above for use later.
-
 .. toctree::
     :caption: Related Products
 
-.. todo:: Add any product links here. If there are none, then simply delete this todo and leave
-    the toctree above for use later.
+    Adafruit I2S MEMS Microphone Breakout - ICS-43434 <https://www.adafruit.com/product/6049>
+    Adafruit I2S MEMS Microphone Breakout - SPH0645LM4H <https://www.adafruit.com/product/3421>
 
 .. toctree::
     :caption: Other Links
 
-    Download from GitHub <https://github.com/dcooperdalrymple/CircuitPython_I2SInOut/releases/latest>
+    Download from GitHub <https://github.com/relic-se/CircuitPython_I2SInOut/releases/latest>
     Download Library Bundle <https://circuitpython.org/libraries>
     CircuitPython Reference Documentation <https://docs.circuitpython.org>
     CircuitPython Support Forum <https://forums.adafruit.com/viewforum.php?f=60>
