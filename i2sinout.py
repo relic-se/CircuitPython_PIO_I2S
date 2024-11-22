@@ -67,6 +67,7 @@ class I2SInOut:
         bits_per_sample: int = 16,
         samples_signed: bool = True,
         buffer_size: int = 1024,
+        left_justified: bool = False,
         peripheral: bool = False,
     ):
         if word_select and not rp2pio.pins_are_sequential([bit_clock, word_select]):
@@ -90,8 +91,8 @@ class I2SInOut:
         self._channel_count = channel_count
         self._sample_rate = sample_rate
         self._bits_per_sample = bits_per_sample
-        self._buffer_size = buffer_size
         self._samples_signed = samples_signed
+        self._buffer_size = buffer_size
 
         self._writable = bool(data_out)
         self._readable = bool(data_in)
@@ -104,29 +105,30 @@ class I2SInOut:
 
         if not peripheral:
             pioasm = f"""
-.program i2s_codec
+.program i2sinout
 .side_set 2
-    nop                         side 0b01
-    set x {bits_per_sample-2}   side 0b01
+    nop                         side 0b{1 if left_justified else 0}1
+    set x {bits_per_sample-2}   side 0b{1 if left_justified else 0}1
 left_bit:
     {left_channel_out}          side 0b00 [1]
     {left_channel_in}           side 0b01
     jmp x-- left_bit            side 0b01
-    {left_channel_out}          side 0b10 [1]
-    {left_channel_in}           side 0b11
-    set x {bits_per_sample-2}   side 0b11
+    {left_channel_out}          side 0b{0 if left_justified else 1}0 [1]
+    {left_channel_in}           side 0b{0 if left_justified else 1}1
+    set x {bits_per_sample-2}   side 0b{0 if left_justified else 1}1
 right_bit:
     {right_channel_out}         side 0b10 [1]
     {right_channel_in}          side 0b11
     jmp x-- right_bit           side 0b11
-    {right_channel_out}         side 0b00 [1]
-    {right_channel_in}          side 0b01
+    {right_channel_out}         side 0b{1 if left_justified else 0}0 [1]
+    {right_channel_in}          side 0b{1 if left_justified else 0}1
 """
         else:
             bit_clock_gpio = _get_gpio_index(bit_clock)
             word_select_gpio = _get_gpio_index(word_select) if word_select else bit_clock_gpio + 1
-            pioasm = f"""
-.program i2s_codec
+            if not left_justified:
+                pioasm = f"""
+.program i2sinout
 .side_set 2
     wait 1 gpio {word_select_gpio}
     wait 1 gpio {bit_clock_gpio}
@@ -158,10 +160,33 @@ right_bit:
     wait 1 gpio {bit_clock_gpio}
     {right_channel_in}
 """
+            else:
+                pioasm = f"""
+.program i2sinout
+.side_set 2
+    wait 1 gpio {word_select_gpio}
+    wait 1 gpio {bit_clock_gpio}
+    set x {bits_per_sample-1}
+    wait 0 gpio {word_select_gpio}
+left_bit:
+    wait 0 gpio {bit_clock_gpio}
+    {left_channel_out}
+    wait 1 gpio {bit_clock_gpio}
+    {left_channel_in}
+    jmp x-- left_bit
+    set x {bits_per_sample-1}
+    wait 1 gpio {word_select_gpio}
+right_bit:
+    wait 0 gpio {bit_clock_gpio}
+    {right_channel_out}
+    wait 1 gpio {bit_clock_gpio}
+    {right_channel_in}
+    jmp x-- right_bit
+"""
 
         self._pio = rp2pio.StateMachine(
             program=adafruit_pioasm.assemble(pioasm),
-            wrap_target=1 if not peripheral else 4,
+            wrap_target=1 if not peripheral else (4 if not left_justified else 2),
             frequency=sample_rate * bits_per_sample * 2 * (4 if not peripheral else 16),
             first_out_pin=data_out,
             out_pin_count=1,
