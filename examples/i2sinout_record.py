@@ -7,10 +7,11 @@
 # storage.remount("/", readonly=False)
 
 import array
-import board
 import os
 
 import adafruit_wave
+import board
+
 import i2sinout
 
 PATH = "/test.wav"
@@ -29,7 +30,7 @@ mic = i2sinout.I2SInOut(
 # Remove existing file if it exists
 try:
     os.remove(PATH)
-except:
+except OSError:
     pass
 
 # Determine the number of buffers we need to write
