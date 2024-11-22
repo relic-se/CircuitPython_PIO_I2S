@@ -239,6 +239,12 @@ right_bit:
         self._pio.deinit()
         del self._pio
 
+        if hasattr(self, "_buffer_out"):
+            del self._buffer_out
+        
+        if hasattr(self, "_buffer_in"):
+            del self._buffer_in
+
     @property
     def channel_count(self) -> int:
         return self._channel_count
