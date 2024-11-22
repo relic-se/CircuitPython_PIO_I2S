@@ -36,6 +36,7 @@ except:
 num_buffers = int((LENGTH / 1000.0 * mic.sample_rate * mic.channel_count) // mic.buffer_size)
 
 # Copy audio from input buffer into file buffer
+# NOTE: Recording data and writing to a file at the same time causes stutters in audio
 data = array.array(mic.buffer_format, [0] * mic.buffer_size * num_buffers)
 for i in range(num_buffers):
     buffer = mic.read(block=True)
