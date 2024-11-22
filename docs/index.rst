@@ -24,14 +24,11 @@ Table of Contents
 .. toctree::
     :caption: Tutorials
 
-.. todo:: Add any Learn guide links here. If there are none, then simply delete this todo and leave
-    the toctree above for use later.
-
 .. toctree::
     :caption: Related Products
 
-.. todo:: Add any product links here. If there are none, then simply delete this todo and leave
-    the toctree above for use later.
+    Adafruit I2S MEMS Microphone Breakout - ICS-43434 <https://www.adafruit.com/product/6049>
+    Adafruit I2S MEMS Microphone Breakout - SPH0645LM4H <https://www.adafruit.com/product/3421>
 
 .. toctree::
     :caption: Other Links
