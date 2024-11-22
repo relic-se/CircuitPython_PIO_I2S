@@ -18,7 +18,7 @@ readme = "README.rst"
 authors = [
     {name = "Cooper Dalrymple", email = "me@dcdalrymple.com"}
 ]
-urls = {Homepage = "https://github.com/dcooperdalrymple/CircuitPython_I2SInOut"}
+urls = {Homepage = "https://github.com/relic-se/CircuitPython_I2SInOut"}
 keywords = [
     "adafruit",
     "blinka",

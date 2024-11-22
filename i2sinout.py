@@ -34,7 +34,7 @@ Implementation Notes
 # imports
 
 __version__ = "0.0.0+auto.0"
-__repo__ = "https://github.com/dcooperdalrymple/CircuitPython_I2SInOut.git"
+__repo__ = "https://github.com/relic-se/CircuitPython_I2SInOut.git"
 
 import array
 
