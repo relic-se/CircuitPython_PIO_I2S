@@ -33,7 +33,7 @@ Table of Contents
 .. toctree::
     :caption: Other Links
 
-    Download from GitHub <https://github.com/relic-se/CircuitPython_I2SInOut/releases/latest>
+    Download from GitHub <https://github.com/relic-se/CircuitPython_PIO_I2S/releases/latest>
     Download Library Bundle <https://circuitpython.org/libraries>
     CircuitPython Reference Documentation <https://docs.circuitpython.org>
     CircuitPython Support Forum <https://forums.adafruit.com/viewforum.php?f=60>

@@ -5,9 +5,9 @@
 import board
 import ulab.numpy as np
 
-import i2sinout
+import pio_i2s
 
-codec = i2sinout.I2SInOut(
+codec = pio_i2s.I2S(
     bit_clock=board.GP0,  # word select is GP1
     data_in=board.GP2,
     channel_count=1,

@@ -2,8 +2,8 @@ Introduction
 ============
 
 
-.. image:: https://readthedocs.org/projects/circuitpython-i2sinout/badge/?version=latest
-    :target: https://circuitpython-i2sinout.readthedocs.io/
+.. image:: https://readthedocs.org/projects/circuitpython-pio-i2s/badge/?version=latest
+    :target: https://circuitpython-pio-i2s.readthedocs.io/
     :alt: Documentation Status
 
 
@@ -12,8 +12,8 @@ Introduction
     :alt: Discord
 
 
-.. image:: https://github.com/relic-se/CircuitPython_I2SInOut/workflows/Build%20CI/badge.svg
-    :target: https://github.com/relic-se/CircuitPython_I2SInOut/actions
+.. image:: https://github.com/relic-se/CircuitPython_PIO_I2S/workflows/Build%20CI/badge.svg
+    :target: https://github.com/relic-se/CircuitPython_PIO_I2S/actions
     :alt: Build Status
 
 
@@ -42,18 +42,18 @@ Installing from PyPI
    as a standard element. Stay tuned for PyPI availability!
 
 On supported GNU/Linux systems like the Raspberry Pi, you can install the driver locally `from
-PyPI <https://pypi.org/project/circuitpython-i2sinout/>`_.
+PyPI <https://pypi.org/project/circuitpython-pio-i2s/>`_.
 To install for current user:
 
 .. code-block:: shell
 
-    pip3 install circuitpython-i2sinout
+    pip3 install circuitpython-pio-i2s
 
 To install system-wide (this may be required in some cases):
 
 .. code-block:: shell
 
-    sudo pip3 install circuitpython-i2sinout
+    sudo pip3 install circuitpython-pio-i2s
 
 To install in a virtual environment in your current project:
 
@@ -62,7 +62,7 @@ To install in a virtual environment in your current project:
     mkdir project-name && cd project-name
     python3 -m venv .venv
     source .env/bin/activate
-    pip3 install circuitpython-i2sinout
+    pip3 install circuitpython-pio-i2s
 
 Installing to a Connected CircuitPython Device with Circup
 ==========================================================
@@ -79,7 +79,7 @@ following command to install:
 
 .. code-block:: shell
 
-    circup install i2sinout
+    circup install pio_i2s
 
 Or the following command to update an existing version:
 
@@ -93,14 +93,14 @@ Usage Example
 .. code-block:: python
 
     import board
-    import i2sinout
-    codec = i2sinout.I2SInOut(board.GP0, data_in=board.GP2, data_out=board.GP3)
+    import pio_i2s
+    codec = pio_i2s.I2S(board.GP0, data_in=board.GP2, data_out=board.GP3)
     while True:
         codec.write(codec.read(block=True))
 
 Documentation
 =============
-API documentation for this library can be found on `Read the Docs <https://circuitpython-i2sinout.readthedocs.io/>`_.
+API documentation for this library can be found on `Read the Docs <https://circuitpython-pio-i2s.readthedocs.io/>`_.
 
 For information on building library documentation, please check out
 `this guide <https://learn.adafruit.com/creating-and-sharing-a-circuitpython-library/sharing-our-docs-on-readthedocs#sphinx-5-1>`_.
@@ -109,5 +109,5 @@ Contributing
 ============
 
 Contributions are welcome! Please read our `Code of Conduct
-<https://github.com/relic-se/CircuitPython_I2SInOut/blob/HEAD/CODE_OF_CONDUCT.md>`_
+<https://github.com/relic-se/CircuitPython_PIO_I2S/blob/HEAD/CODE_OF_CONDUCT.md>`_
 before contributing to help this project stay welcoming.

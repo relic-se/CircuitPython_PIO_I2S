@@ -5,12 +5,12 @@
 import board
 import ulab.numpy as np
 
-import i2sinout
+import pio_i2s
 
-codec = i2sinout.I2SInOut(
-    bit_clock=board.GP0,
-    word_select=board.GP1,  # does not need to be sequential in peripheral mode
-    data_in=board.GP2,
+codec = pio_i2s.I2S(
+    bit_clock=board.GP1,
+    word_select=board.GP2,  # does not need to be sequential in peripheral mode
+    data_in=board.GP0,  # must come before bit_clock
     channel_count=1,
     sample_rate=22050,
     bits_per_sample=16,

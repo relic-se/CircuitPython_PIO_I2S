@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: MIT
 """
-`i2sinout`
+`pio_i2s`
 ================================================================================
 
 Bidirectional I2S audio communication using PIO.
@@ -24,7 +24,7 @@ Implementation Notes
 # imports
 
 __version__ = "0.0.0+auto.0"
-__repo__ = "https://github.com/relic-se/CircuitPython_I2SInOut.git"
+__repo__ = "https://github.com/relic-se/CircuitPython_PIO_I2S.git"
 
 import array
 
@@ -45,7 +45,7 @@ def _get_gpio_index(pin: microcontroller.Pin) -> int:
     return None
 
 
-class I2SInOut:
+class I2S:
     """Communicate with external audio devices using I2S protocol.
 
     :param bit_clock: The bit clock (or serial clock) pin.
@@ -127,7 +127,7 @@ class I2SInOut:
 
         if not peripheral:
             pioasm = f"""
-.program i2sinout
+.program i2s_controller
 .side_set 2
     nop                         side 0b{1 if left_justified else 0}1
     set x {bits_per_sample-2}   side 0b{1 if left_justified else 0}1
@@ -150,7 +150,7 @@ right_bit:
             word_select_gpio = _get_gpio_index(word_select) if word_select else bit_clock_gpio + 1
             if not left_justified:
                 pioasm = f"""
-.program i2sinout
+.program i2s_peripheral
 .side_set 2
     wait 1 gpio {word_select_gpio}
     wait 1 gpio {bit_clock_gpio}
@@ -184,7 +184,7 @@ right_bit:
 """
             else:
                 pioasm = f"""
-.program i2sinout
+.program i2s_peripheral_left_justified
 .side_set 2
     wait 1 gpio {word_select_gpio}
     wait 1 gpio {bit_clock_gpio}

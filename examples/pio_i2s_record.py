@@ -12,12 +12,12 @@ import os
 import adafruit_wave
 import board
 
-import i2sinout
+import pio_i2s
 
 PATH = "/test.wav"
 LENGTH = 3000  # ms
 
-mic = i2sinout.I2SInOut(
+mic = pio_i2s.I2S(
     bit_clock=board.GP0,  # word select is GP1
     data_in=board.GP2,
     channel_count=1,
