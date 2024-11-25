@@ -7,7 +7,6 @@ Introduction
     :alt: Documentation Status
 
 
-
 .. image:: https://img.shields.io/discord/327254708534116352.svg
     :target: https://adafru.it/discord
     :alt: Discord
@@ -24,17 +23,12 @@ Introduction
 
 Bidirectional I2S audio communication using PIO.
 
-.. note:: This library relies on ``rp2pio.StateMachine.background_read`` which was introduced in an
-    experimental build of CircuitPython that is not available in the current stable release. See
-    the relevant pull request for further details:
-    `PR #9659 <https://github.com/adafruit/circuitpython/pull/9659>`_.
-
 
 Dependencies
 =============
 This driver depends on:
 
-* `Adafruit CircuitPython <https://github.com/adafruit/circuitpython>`_
+* `Adafruit CircuitPython <https://github.com/adafruit/circuitpython>`_ (version 9.2.1+)
 
 Please ensure all dependencies are available on the CircuitPython filesystem.
 This is easily achieved by downloading
