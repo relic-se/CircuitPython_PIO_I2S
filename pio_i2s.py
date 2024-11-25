@@ -306,19 +306,8 @@ right_bit:
         """
         return self._buffer_format
 
-    @property
-    def writable(self) -> bool:
-        """Whether or not the I2S bus can be written to. This property will return False if data_out
-        is not specified within the constructor. This property is read-only.
-        """
-        return self._writable
-
-    @property
-    def write_index(self) -> int:
-        """The currently available index of the write buffers that can be written to. Either 0 or 1.
-        This property is read-only.
-        """
-        if not self._writable:
+    def _get_write_index(self) -> int:
+        if self._writable:
             return None
         last_write = self._pio.last_write
         for i in range(2):
@@ -327,30 +316,25 @@ right_bit:
                 break
         return self._write_index
 
+    def _set_write_buffer(
+        self, data: circuitpython_typing.ReadableBuffer, double: bool = False
+    ) -> None:
+        if self._writable:
+            if not double:
+                idx = self._get_write_index()
+                for i in range(min(len(data), self._buffer_size)):
+                    self._buffer_out[idx][i] = data[i]
+                self._last_write_index = idx
+            else:
+                for i in range(self._buffer_size):
+                    self._buffer_out[0][i] = self._buffer_out[1][i] = data[i % len(data)]
+
     @property
     def write_ready(self) -> bool:
         """Whether or not the I2S bus has a buffer that is ready to be written to. This property is
         read-only.
         """
-        return self._writable and self.write_index != self._last_write_index
-
-    @property
-    def write_buffer(self) -> array.array:
-        """The current output buffer. The elements of this array can be modified. If directly
-        assigned to another array-like object, the buffer will be written to up to the maximum
-        :attr:`buffer_size`.
-        """
-        if not self._writable:
-            return None
-        return self._buffer_out[self.write_index]
-
-    @write_buffer.setter
-    def write_buffer(self, value: circuitpython_typing.ReadableBuffer) -> None:
-        if self._writable:
-            idx = self.write_index
-            for i in range(min(len(value), self._buffer_size)):
-                self._buffer_out[idx][i] = value[i]
-            self._last_write_index = idx
+        return self._writable and self._get_write_index() != self._last_write_index
 
     def write(
         self, data: circuitpython_typing.ReadableBuffer, loop: bool = False, block: bool = True
@@ -372,22 +356,14 @@ right_bit:
             for i in range(2 if loop else 1):
                 while not self.write_ready:
                     pass
-                self.write_buffer = data
+                self._set_write_buffer(data)
         elif loop:
-            for i in range(self._buffer_size):
-                self._buffer_out[0][i] = self._buffer_out[1][i] = data[i % len(data)]
+            self._set_write_buffer(data, True)
         else:
             if not self.write_ready:
                 return False
-            self.write_buffer = data
+            self._set_write_buffer(data)
         return True
-
-    @property
-    def readable(self) -> bool:
-        """Whether or not the I2S bus can be read from. This property will return False if data_in
-        is not specified within the constructor. This property is read-only.
-        """
-        return self._readable
 
     def read(self, block: bool = True) -> array.array:
         """Read the input data from the I2S bus as an array of audio samples.
