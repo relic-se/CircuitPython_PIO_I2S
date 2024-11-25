@@ -10,7 +10,7 @@ import audiomixer
 import board
 import ulab.numpy as np
 
-import i2sinout
+import pio_i2s
 
 BUFFER_SIZE = 1024
 
@@ -21,7 +21,7 @@ properties = {
     "samples_signed": True,
 }
 
-input = i2sinout.I2SInOut(
+input = pio_i2s.I2S(
     peripheral=True,  # Share clock signals with I2SOut
     data_in=board.GP0,
     bit_clock=board.GP1,
@@ -44,7 +44,7 @@ mixer = audiomixer.Mixer(
     **properties,
 )
 
-# Currently unable to get buffer from audio sample objects to feed into I2SInOut
+# Currently unable to get buffer from audio sample objects to feed into I2S
 # Must use a separate `audiosample.I2SOut` object, and connect bit_clock and word_select together
 output = audiobusio.I2SOut(
     bit_clock=board.GP3,

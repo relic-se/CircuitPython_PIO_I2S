@@ -8,13 +8,13 @@ import math
 
 import board
 
-import i2sinout
+import pio_i2s
 
 CHANNEL_COUNT = 2
 SAMPLE_RATE = 22050
 LENGTH = SAMPLE_RATE // 440
 
-codec = i2sinout.I2SInOut(
+codec = pio_i2s.I2S(
     bit_clock=board.GP0,  # word select is GP1
     data_out=board.GP3,
     channel_count=CHANNEL_COUNT,

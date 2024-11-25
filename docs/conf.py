@@ -43,7 +43,7 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = "CircuitPython I2SInOut Library"
+project = "CircuitPython PIO I2S Library"
 creation_year = "2024"
 current_year = str(datetime.datetime.now().year)
 year_duration = (
@@ -141,8 +141,8 @@ latex_elements = {
 latex_documents = [
     (
         master_doc,
-        "CircuitPython_I2SInOut_Library.tex",
-        "CircuitPython I2SInOut Library Documentation",
+        "CircuitPython_PIO_I2S_Library.tex",
+        "CircuitPython PIO I2S Library Documentation",
         author,
         "manual",
     ),
@@ -155,8 +155,8 @@ latex_documents = [
 man_pages = [
     (
         master_doc,
-        "CircuitPython_I2SInOut_Library",
-        "CircuitPython I2SInOut Library Documentation",
+        "CircuitPython_PIO_I2S_Library",
+        "CircuitPython PIO I2S Library Documentation",
         [author],
         1,
     ),
@@ -170,10 +170,10 @@ man_pages = [
 texinfo_documents = [
     (
         master_doc,
-        "CircuitPython_I2SInOut_Library",
-        "CircuitPython I2SInOut Library Documentation",
+        "CircuitPython_PIO_I2S_Library",
+        "CircuitPython PIO I2S Library Documentation",
         author,
-        "CircuitPython_I2SInOut_Library",
+        "CircuitPython_PIO_I2S_Library",
         "One line description of project.",
         "Miscellaneous",
     ),

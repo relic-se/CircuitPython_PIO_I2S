@@ -11,20 +11,20 @@ requires = [
 ]
 
 [project]
-name = "circuitpython-i2sinout"
+name = "circuitpython-pio-i2s"
 description = "Bidirectional I2S audio communication using PIO."
 version = "0.0.0+auto.0"
 readme = "README.rst"
 authors = [
     {name = "Cooper Dalrymple", email = "me@dcdalrymple.com"}
 ]
-urls = {Homepage = "https://github.com/relic-se/CircuitPython_I2SInOut"}
+urls = {Homepage = "https://github.com/relic-se/CircuitPython_PIO_I2S"}
 keywords = [
     "adafruit",
     "blinka",
     "circuitpython",
     "micropython",
-    "i2sinout",
+    "pio",
     "i2s",
     "audio",
     "codec",
@@ -41,7 +41,7 @@ classifiers = [
 dynamic = ["dependencies", "optional-dependencies"]
 
 [tool.setuptools]
-py-modules = ["i2sinout"]
+py-modules = ["pio_i2s"]
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
