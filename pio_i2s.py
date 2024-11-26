@@ -232,11 +232,13 @@ right_bit:
         if not samples_signed:
             self._buffer_format = self._buffer_format.upper()
 
+        self._silence = 0 if samples_signed else 2 ** (bits_per_sample - 1)
+
         if self._writable:
             self._buffer_out = [
                 array.array(
                     self._buffer_format,
-                    [0 if samples_signed else 2 ** (bits_per_sample - 1)] * buffer_size,
+                    [self._silence] * buffer_size,
                 )
                 for i in range(2)
             ]  # double-buffered
@@ -249,7 +251,7 @@ right_bit:
 
         if self._readable:
             self._buffer_in = [
-                array.array(self._buffer_format, [0] * buffer_size) for i in range(2)
+                array.array(self._buffer_format, [self._silence] * buffer_size) for i in range(2)
             ]  # double-buffered
             self._pio.background_read(
                 loop=self._buffer_in[0],
@@ -320,14 +322,15 @@ right_bit:
         self, data: circuitpython_typing.ReadableBuffer, double: bool = False
     ) -> None:
         if self._writable:
-            if not double:
-                idx = self._get_write_index()
-                for i in range(min(len(data), self._buffer_size)):
-                    self._buffer_out[idx][i] = data[i]
+            idx = self._get_write_index()
+            for i in range(2 if double else 1):
+                for j in range(min(len(data), self._buffer_size)):
+                    self._buffer_out[idx][j] = data[j]
+                if len(data) < self._buffer_size:
+                    for j in range(len(data), self._buffer_size):
+                        self._buffer_out[idx][j] = self._silence
                 self._last_write_index = idx
-            else:
-                for i in range(self._buffer_size):
-                    self._buffer_out[0][i] = self._buffer_out[1][i] = data[i % len(data)]
+                idx = (idx + 1) % 2
 
     @property
     def write_ready(self) -> bool:
