@@ -307,7 +307,7 @@ right_bit:
         return self._buffer_format
 
     def _get_write_index(self) -> int:
-        if self._writable:
+        if not self._writable:
             return None
         last_write = self._pio.last_write
         for i in range(2):
