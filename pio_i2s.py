@@ -368,6 +368,26 @@ right_bit:
             self._set_write_buffer(data)
         return True
 
+    def play(self, source: circuitpython_typing.ReadableBuffer, source_length: int = None) -> bool:
+        """Plays samples from the source data to the output of the I2S bus bytes of samples to
+        destination. This is blocking.
+
+        :param destination: The destination buffer to write the samples from the I2S bus to.
+        :type destination: :class:`circuitpython_typing.ReadableBuffer`
+        :param destination_length: The number of samples to write to the destination buffer. If not
+            provided, the full size of the destination buffer will be written to.
+        :type destination_length: `int`
+        """
+        if not self._writable:
+            return False
+        if source_length is None:
+            source_length = len(source)
+        index = 0
+        while index < source_length:
+            self.write(source[index : index + min(source_length - index, self._buffer_size)])
+            index += self._buffer_size
+        return True
+
     def read(self, block: bool = True) -> array.array:
         """Read the input data from the I2S bus as an array of audio samples.
 
@@ -385,3 +405,29 @@ right_bit:
             return data
         else:
             return self._pio.last_read
+
+    def record(
+        self, destination: circuitpython_typing.ReadableBuffer, destination_length: int = None
+    ) -> bool:
+        """Records samples from the I2S bus to the destination. This is blocking.
+
+        :param destination: The destination buffer to write the samples from the I2S bus to.
+        :type destination: :class:`circuitpython_typing.ReadableBuffer`
+        :param destination_length: The number of samples to write to the destination buffer. If not
+            provided, the full size of the destination buffer will be written to.
+        :type destination_length: `int`
+        :return: Whether or not the recording operation was successful.
+        """
+        if not self._readable:
+            return False
+        if destination_length is None:
+            destination_length = len(destination)
+        index = 0
+        while index < destination_length:
+            buffer = self.read()
+            if not buffer:
+                return False
+            for i in range(min(destination_length - index, self._buffer_size)):
+                destination[index + i] = buffer[i]
+            index += self._buffer_size
+        return True
