@@ -260,9 +260,10 @@ right_bit:
 
     def deinit(self) -> None:
         """Stop I2S communication and de-initialize resources used by this object."""
-        self._pio.stop()
-        self._pio.deinit()
-        del self._pio
+        if hasattr(self, "_pio"):
+            self._pio.stop()
+            self._pio.deinit()
+            del self._pio
 
         if hasattr(self, "_buffer_out"):
             del self._buffer_out
@@ -274,6 +275,9 @@ right_bit:
         return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
+        self.deinit()
+
+    def __del__(self):
         self.deinit()
 
     @property
