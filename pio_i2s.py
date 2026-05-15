@@ -270,6 +270,12 @@ right_bit:
         if hasattr(self, "_buffer_in"):
             del self._buffer_in
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        self.deinit()
+
     @property
     def channel_count(self) -> int:
         """The number of channels used by the I2S bus. 1 for mono, 2 for stereo. This property is
